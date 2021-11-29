@@ -20,13 +20,20 @@ class TopicoService(
     private val notFoundMessage: String = "Tópico não encontrado"
 ) {
 
-    fun getAll(): List<TopicoView> {
-        val uuid = UUID.randomUUID()
+    fun getAll(nomeCurso: String?): List<TopicoView> {
+        /*val uuid = UUID.randomUUID()
         println("UUID         = $uuid")
         println("UUID version = ${uuid.version()}")
-        println("UUID variant = ${uuid.variant()}")
+        println("UUID variant = ${uuid.variant()}")*/
 
-        return repository.findAll().stream()
+        val topicos = if (nomeCurso == null) {
+            repository.findAll()
+        }
+        else {
+            repository.findByCursoNome(nomeCurso)
+        }
+
+        return topicos.stream()
             .map { t -> topicoViewMapper.map(t) }
             .collect(Collectors.toList())
     }
