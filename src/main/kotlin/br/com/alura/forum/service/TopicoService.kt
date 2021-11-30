@@ -7,6 +7,8 @@ import br.com.alura.forum.exception.NotFoundException
 import br.com.alura.forum.mapper.NovoTopicoMapper
 import br.com.alura.forum.mapper.TopicoViewMapper
 import br.com.alura.forum.repository.TopicoRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.stream.Collectors
@@ -20,22 +22,22 @@ class TopicoService(
     private val notFoundMessage: String = "Tópico não encontrado"
 ) {
 
-    fun getAll(nomeCurso: String?): List<TopicoView> {
+    fun getAll(
+        nomeCurso: String?,
+        paginacao: Pageable
+    ): Page<TopicoView> {
         /*val uuid = UUID.randomUUID()
         println("UUID         = $uuid")
         println("UUID version = ${uuid.version()}")
         println("UUID variant = ${uuid.variant()}")*/
 
         val topicos = if (nomeCurso == null) {
-            repository.findAll()
-        }
-        else {
-            repository.findByCursoNome(nomeCurso)
+            repository.findAll(paginacao)
+        } else {
+            repository.findByCursoNome(nomeCurso, paginacao)
         }
 
-        return topicos.stream()
-            .map { t -> topicoViewMapper.map(t) }
-            .collect(Collectors.toList())
+        return topicos.map { t -> topicoViewMapper.map(t) }
     }
 
     fun getById(id: Long): TopicoView {
