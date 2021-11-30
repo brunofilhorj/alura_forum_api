@@ -3,6 +3,7 @@ package br.com.alura.forum.controller
 import br.com.alura.forum.dto.NovoTopico
 import br.com.alura.forum.dto.TopicoView
 import br.com.alura.forum.dto.AtualizaTopico
+import br.com.alura.forum.dto.TopicoPorCategoriaDto
 import br.com.alura.forum.service.TopicoService
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -63,5 +64,10 @@ class TopicoController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun remover(@PathVariable id: Long) {
         service.delete(id)
+    }
+
+    @GetMapping("/relatorio")
+    fun relatorio(): List<TopicoPorCategoriaDto> {
+        return service.relatorio()
     }
 }
