@@ -27,7 +27,7 @@ class SecurityConfiguration(
         http?.csrf()?.disable()?.
             // qualquer requisição deverá estar autenticada
         authorizeRequests()?.
-        antMatchers( "/topicos")?.hasAuthority("LEITURA")?.
+        antMatchers( "/topicos")?.hasAuthority("LEITURA_ESCRITA")?.
         antMatchers(HttpMethod.POST, "/login")?.permitAll()?.anyRequest()?.authenticated()?.and()
         http?.addFilterBefore(
             JWTLoginFilter(authManager = authenticationManager(), jwtUtil = jwtUtil),
