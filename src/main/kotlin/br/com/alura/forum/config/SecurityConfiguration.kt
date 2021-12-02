@@ -1,5 +1,7 @@
 package br.com.alura.forum.config
 
+import br.com.alura.forum.security.JWTAuthenticationFilter
+import br.com.alura.forum.security.JWTLoginFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -10,24 +12,33 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.filter.OncePerRequestFilter
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: UserDetailsService,
+    private val jwtUtil: JWTUtil
 ) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity?) {
         //super.configure(http)
-        http?.
+        http?.csrf()?.disable()?.
             // qualquer requisição deverá estar autenticada
         authorizeRequests()?.
-        antMatchers(HttpMethod.POST, "/topicos")?.hasAuthority("LEITURA_ESCRITA")?.anyRequest()?.
-        authenticated()?.and()?.
+        antMatchers( "/topicos")?.hasAuthority("LEITURA")?.
+        antMatchers(HttpMethod.POST, "/login")?.permitAll()?.anyRequest()?.authenticated()?.and()
+        http?.addFilterBefore(
+            JWTLoginFilter(authManager = authenticationManager(), jwtUtil = jwtUtil),
+            UsernamePasswordAuthenticationFilter().javaClass
+        )
+        http?.addFilterBefore(
+            JWTAuthenticationFilter(jwtUtil),
+            UsernamePasswordAuthenticationFilter().javaClass
+        )?.
             // não guardar estado da sessão
-        sessionManagement()?.sessionCreationPolicy(SessionCreationPolicy.STATELESS)?.and()?.
-            // desabilita o formlogin do sprint security (ele vem habilitado por default)
-        formLogin()?.disable()?.httpBasic()
+        sessionManagement()?.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 
     @Bean
